@@ -1,6 +1,6 @@
 import { SlackAPI } from "https://deno.land/x/deno_slack_api@2.1.1/mod.ts";
 
-import { validateAndGetEnvVars } from "./utils.ts"; // Assuming utils.ts is in the same directory
+import { validateAndGetEnvVars } from "../utils.ts"; // Assuming utils.ts is in the same directory
 import type * as SlackTypes from "./slack.d.ts";
 
 const { SLACK_BOT_TOKEN, SLACK_CHANNEL_ID } = validateAndGetEnvVars([
