@@ -27,19 +27,20 @@ jobs:
           path: ${{ env.DENO_DIR }}
           key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
 
+
       - name: Run tests
         id: run_tests
         run: |
           output=$(deno test --allow-write --allow-read --allow-env)
           echo "$output"
-          echo "TEST_OUTPUT=$output" >> $GITHUB_ENV
-  
+          echo "TEST_OUTPUT=$(echo "$output" | base64)" >> $GITHUB_ENV
+
       - name: Run benchmarks
         id: run_benchmarks
         run: |
           output=$(deno bench --allow-env --allow-read --allow-write utils/utils_bench.ts)
           echo "$output"
-          echo "BENCHMARK_OUTPUT=$output" >> $GITHUB_ENV
+          echo "BENCHMARK_OUTPUT=$(echo "$output" | base64)" >> $GITHUB_ENV
   
       - name: Add Job Summary
         run: |
@@ -49,13 +50,13 @@ jobs:
           # Adding test output to summary
           echo "### Test Output" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "${{ env.TEST_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.TEST_OUTPUT }}" | base64 --decode >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
   
           # Adding benchmark output to summary
           echo "### Benchmark Output" >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
-          echo "${{ env.BENCHMARK_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.BENCHMARK_OUTPUT }}" | base64 --decode >> $GITHUB_STEP_SUMMARY
           echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Increment version and push tag
