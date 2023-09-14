@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  DENO_DIR: .deno_cache  # Cache directory for Deno dependencies
+  DENO_DIR: .deno_cache
 
 jobs:
   build:
