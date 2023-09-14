@@ -22,7 +22,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@3
+        uses: actions/cache@v2
         with:
           path: ${{ env.DENO_DIR }}
           key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
