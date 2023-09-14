@@ -28,10 +28,35 @@ jobs:
           key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
 
       - name: Run tests
-        run: deno test --allow-write --allow-read --allow-env
-
+        id: run_tests
+        run: |
+          output=$(deno test --allow-write --allow-read --allow-env)
+          echo "$output"
+          echo "TEST_OUTPUT=$output" >> $GITHUB_ENV
+  
       - name: Run benchmarks
-        run: deno bench --allow-env --allow-read --allow-write utils/utils_bench.ts
+        id: run_benchmarks
+        run: |
+          output=$(deno bench --allow-env --allow-read --allow-write utils/utils_bench.ts)
+          echo "$output"
+          echo "BENCHMARK_OUTPUT=$output" >> $GITHUB_ENV
+  
+      - name: Add Job Summary
+        run: |
+          echo "## Test and Benchmark Summary" >> $GITHUB_STEP_SUMMARY
+          echo "Ran tests and benchmarks for the project. Here are the results:" >> $GITHUB_STEP_SUMMARY
+  
+          # Adding test output to summary
+          echo "### Test Output" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.TEST_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+  
+          # Adding benchmark output to summary
+          echo "### Benchmark Output" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.BENCHMARK_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Increment version and push tag
         run: |
