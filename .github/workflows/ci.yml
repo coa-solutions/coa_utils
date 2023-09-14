@@ -30,40 +30,33 @@ jobs:
       - name: Run tests
         id: run_tests
         run: |
-          deno task test > test_output.txt
-    
+          TEST_OUTPUT=$(deno task test)
+          echo "TEST_OUTPUT=$TEST_OUTPUT" >> $GITHUB_ENV
+
       - name: Run benchmarks
         id: run_benchmarks
         run: |
-          deno task bench > benchmark_output.txt
-    
+          BENCHMARK_OUTPUT=$(deno task bench)
+          echo "BENCHMARK_OUTPUT=$BENCHMARK_OUTPUT" >> $GITHUB_ENV
+
       - name: Add Job Summary
         run: |
           echo "## Test and Benchmark Summary" >> $GITHUB_STEP_SUMMARY
           echo "Ran tests and benchmarks for the project. Here are the results:" >> $GITHUB_STEP_SUMMARY
-  
-          # Adding test output to summary
+          
           echo "### Test Output" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
-          cat test_output.txt | sed 's/\x1b\[[0-9;]*m//g' >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.TEST_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
-          # Adding benchmark output to summary
           echo "### Benchmark Output" >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
-          cat benchmark_output.txt | sed 's/\x1b\[[0-9;]*m//g' >> $GITHUB_STEP_SUMMARY
-          echo "```" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          echo "${{ env.BENCHMARK_OUTPUT }}" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Increment version and push tag
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git fetch --tags
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          IFS='.' read -r -a version_parts <<< "$latest_tag"
-          major="${version_parts[0]}"
-          minor="${version_parts[1]}"
-          new_minor=$((minor + 1))
-          new_version="$major.$new_minor"
-          git tag "$new_version"
-          git push origin "$new_version"
+          latest_tag=$(
