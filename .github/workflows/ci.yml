@@ -30,12 +30,12 @@ jobs:
       - name: Run tests
         id: run_tests
         run: |
-          deno test --allow-write --allow-read --allow-env > test_output.txt
+          deno task test > test_output.txt
     
       - name: Run benchmarks
         id: run_benchmarks
         run: |
-          deno bench --allow-env --allow-read --allow-write utils/utils_bench.ts > benchmark_output.txt
+          deno task bench > benchmark_output.txt
     
       - name: Add Job Summary
         run: |
