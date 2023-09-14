@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
 
       - name: Setup Deno
         uses: denoland/setup-deno@v1
@@ -22,7 +22,7 @@ jobs:
           deno-version: v1.x
 
       - name: Cache Deno dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@3
         with:
           path: ${{ env.DENO_DIR }}
           key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
