@@ -1,4 +1,4 @@
-import { KnownBlock, SectionBlock, MrkdwnElement } from "./slack.d.ts";
+import { KnownBlock, MrkdwnElement, SectionBlock } from "./slack.d.ts";
 
 export function createTextSection(
   text: string,
@@ -60,5 +60,61 @@ export function createMrkdwnField(text: string): MrkdwnElement {
   return {
     type: "mrkdwn",
     text,
+  };
+}
+
+export function createImageBlock(
+  image_url: string,
+  alt_text: string,
+  block_id?: string,
+): KnownBlock {
+  return {
+    type: "image",
+    image_url,
+    alt_text,
+    ...(block_id ? { block_id } : {}),
+  };
+}
+
+export function createDividerBlock(block_id?: string): KnownBlock {
+  return {
+    type: "divider",
+    ...(block_id ? { block_id } : {}),
+  };
+}
+
+export function createContextBlock(
+  elements: (
+    | MrkdwnElement
+    | { type: "image"; image_url: string; alt_text: string }
+  )[],
+  block_id?: string,
+): KnownBlock {
+  return {
+    type: "context",
+    elements,
+    ...(block_id ? { block_id } : {}),
+  };
+}
+
+export function createActionBlock(
+  elements: any[],
+  block_id?: string,
+): KnownBlock {
+  return {
+    type: "actions",
+    elements,
+    ...(block_id ? { block_id } : {}),
+  };
+}
+
+export function createHeaderBlock(text: string, block_id?: string): KnownBlock {
+  return {
+    type: "header",
+    text: {
+      type: "plain_text",
+      text,
+    },
+    ...(block_id ? { block_id } : {}),
   };
 }

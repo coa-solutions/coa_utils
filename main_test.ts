@@ -2,9 +2,6 @@
 // import { assertEquals } from "https://deno.land/std@0.153.0/testing/asserts.ts";
 // import * as mf from "https://deno.land/x/mock_fetch@0.3.0/mod.ts";
 
-
-// const { createContext } = SlackFunctionTester("sample_function");
-
 // Replaces globalThis.fetch with the mocked copy
 // mf.install();
 
@@ -17,9 +14,9 @@
 //   );
 // });
 
-Deno.test("Sample function test", async () => {
-  // await assertEquals(
-  //   outputs?.updatedMsg,
-  //   ":wave: <@U01234567> submitted the following message: \n\n>Hello, World!",
-  // );
-});
+// Deno.test("Sample function test", async () => {
+//   // await assertEquals(
+//   //   outputs?.updatedMsg,
+//   //   ":wave: <@U01234567> submitted the following message: \n\n>Hello, World!",
+//   // );
+// });

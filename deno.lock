@@ -1,6 +1,7 @@
 {
   "version": "2",
   "remote": {
+    "https://crux.land/api/get/2KNRVU.ts": "6a77d55844aba78d01520c5ff0b2f0af7f24cc1716a0de8b3bb6bd918c47b5ba",
     "https://deno.land/std@0.182.0/http/http_errors.ts": "b9a18ef97d6c5966964de95e04d1f9f88a0f8bd8577c26fd402d9d632fb03a42",
     "https://deno.land/std@0.182.0/http/http_status.ts": "8a7bcfe3ac025199ad804075385e57f63d055b2aed539d943ccc277616d6f932",
     "https://deno.land/std@0.200.0/collections/filter_values.ts": "16e1fc456a7969e770ec5b89edf5ac97b295ca534b47c1a83f061b409aad7814",
@@ -234,6 +235,7 @@
     "https://deno.land/x/deno_slack_sdk@2.2.0/types/types.ts": "8f402db92718cb06168f83a78677416fe44fde408a657da5c89451d4eb09f748",
     "https://deno.land/x/deno_slack_sdk@2.2.0/workflows/mod.ts": "96d3a5f441bab0896af2e5324bf0f84f551325aebaba22b2a4faa7de757023d9",
     "https://deno.land/x/deno_slack_sdk@2.2.0/workflows/types.ts": "c2ce90fd410ee3810ac537f2d6c8418b6593643210d1968339c9afd1d1e8fbcb",
-    "https://deno.land/x/deno_slack_sdk@2.2.0/workflows/workflow-step.ts": "130d956c3572a90fccca9d04e5e7fa1031fcd10b1fbc499d692be258feabe1ca"
+    "https://deno.land/x/deno_slack_sdk@2.2.0/workflows/workflow-step.ts": "130d956c3572a90fccca9d04e5e7fa1031fcd10b1fbc499d692be258feabe1ca",
+    "https://deno.land/x/mock_fetch@0.3.0/mod.ts": "7e7806c65ab17b2b684c334c4e565812bdaf504a3e9c938d2bb52bb67428bc89"
   }
 }
