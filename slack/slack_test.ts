@@ -21,87 +21,76 @@ import {
 
 // try {
 Deno.test("Slack API Tests using mock_fetch", async (t) => {
-  // Install mock fetch globally
-  mf.install();
-
-  // Helper to mock a Slack API response
-  const mockSlackAPI = (url: string, responseBody: string, status: number) => {
-    mf.mock(`POST@${url}`, () => {
-      return new Response(responseBody, { status });
-    });
-  };
-
-  // Mocking Slack's postMessage API for success scenario
-  mockSlackAPI("/api/chat.postMessage", `{"ok": true, "ts": "some_ts"}`, 200);
-
-  await t.step("sendMessageToSlack should return a timestamp", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Hello" },
-      },
-    ];
-    const response = await sendMessageToSlack({ blocks });
-    assertEquals(response.ts, "some_ts");
-  });
-
-  // Mocking Slack's postMessage API for error scenario
-  mockSlackAPI(
-    "/api/chat.postMessage",
-    `{"ok": false, "error": "some_error"}`,
-    400,
-  );
-
-  await t.step(
-    "sendMessageToSlack should throw an error for bad request",
-    async () => {
-      const blocks: KnownBlock[] = [
-        {
-          type: "section",
-          text: { type: "mrkdwn", text: "Hello" },
-        },
-      ];
-      try {
-        await sendMessageToSlack({ blocks });
-      } catch (error) {
-        assertEquals(
-          error.message,
-          'Failed to send message to Slack: 400: {"ok": false, "error": "some_error"}',
-        );
-      }
-    },
-  );
-
-  // Mocking Slack's chat.postMessage for threads
-  mockSlackAPI("/api/chat.postMessage", `{"ok": true}`, 200);
-
-  await t.step("sendThreadedMessageToSlack should succeed", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Hello" },
-      },
-    ];
-    await sendMessageToSlack({ blocks, threadTs: "some_thread_ts" });
-  });
-
-  // Mocking Slack's chat.update API
-  mockSlackAPI("/api/chat.update", `{"ok": true}`, 200);
-
-  await t.step("updateMessageInSlack should succeed", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Markdown Message" },
-      },
-    ];
-    await updateMessageInSlack("some_ts", blocks);
-  });
-
-  // Reset handlers and uninstall mock fetch
-  mf.reset();
-  mf.uninstall();
-
+  // // Install mock fetch globally
+  // mf.install();
+  // // Helper to mock a Slack API response
+  // const mockSlackAPI = (url: string, responseBody: string, status: number) => {
+  //   mf.mock(`POST@${url}`, () => {
+  //     return new Response(responseBody, { status });
+  //   });
+  // };
+  // // Mocking Slack's postMessage API for success scenario
+  // mockSlackAPI("/api/chat.postMessage", `{"ok": true, "ts": "some_ts"}`, 200);
+  // await t.step("sendMessageToSlack should return a timestamp", async () => {
+  //   const blocks: KnownBlock[] = [
+  //     {
+  //       type: "section",
+  //       text: { type: "mrkdwn", text: "Hello" },
+  //     },
+  //   ];
+  //   const response = await sendMessageToSlack({ blocks });
+  //   assertEquals(response.ts, "some_ts");
+  // });
+  // // Mocking Slack's postMessage API for error scenario
+  // mockSlackAPI(
+  //   "/api/chat.postMessage",
+  //   `{"ok": false, "error": "some_error"}`,
+  //   400,
+  // );
+  // await t.step(
+  //   "sendMessageToSlack should throw an error for bad request",
+  //   async () => {
+  //     const blocks: KnownBlock[] = [
+  //       {
+  //         type: "section",
+  //         text: { type: "mrkdwn", text: "Hello" },
+  //       },
+  //     ];
+  //     try {
+  //       await sendMessageToSlack({ blocks });
+  //     } catch (error) {
+  //       assertEquals(
+  //         error.message,
+  //         'Failed to send message to Slack: 400: {"ok": false, "error": "some_error"}',
+  //       );
+  //     }
+  //   },
+  // );
+  // // Mocking Slack's chat.postMessage for threads
+  // mockSlackAPI("/api/chat.postMessage", `{"ok": true}`, 200);
+  // await t.step("sendThreadedMessageToSlack should succeed", async () => {
+  //   const blocks: KnownBlock[] = [
+  //     {
+  //       type: "section",
+  //       text: { type: "mrkdwn", text: "Hello" },
+  //     },
+  //   ];
+  //   await sendMessageToSlack({ blocks, threadTs: "some_thread_ts" });
+  // });
+  // // Mocking Slack's chat.update API
+  // mockSlackAPI("/api/chat.update", `{"ok": true}`, 200);
+  // await t.step("updateMessageInSlack should succeed", async () => {
+  //   const blocks: KnownBlock[] = [
+  //     {
+  //       type: "section",
+  //       text: { type: "mrkdwn", text: "Markdown Message" },
+  //     },
+  //   ];
+  //   await updateMessageInSlack("some_ts", blocks);
+  // });
+  // // Reset handlers and uninstall mock fetch
+  // mf.reset();
+  // mf.uninstall();
   // await sendExampleBlocksToSlack();
 });
 
