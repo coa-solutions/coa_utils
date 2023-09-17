@@ -236,8 +236,3 @@ async function sendExampleBlocksToSlack() {
   // Add a divider block after the batch of example blocks
   await sendMessageToSlack({ blocks: [dividerBlock], channelId });
 }
-
-// Call the function to send the example blocks to Slack
-await sendExampleBlocksToSlack().catch((err) => {
-  console.error("Failed to send example blocks to Slack:", err);
-});
