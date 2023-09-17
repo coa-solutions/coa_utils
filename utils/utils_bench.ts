@@ -1,7 +1,7 @@
 import { validateAndGetEnvVars } from "./utils.ts";
 
-// Create a .env file for testing
-Deno.writeTextFileSync(".env", "VAR1=value1\nVAR2=value2");
+Deno.env.set("VAR1", "some_value");
+Deno.env.set("VAR2", "some_value");
 
 // Define the benchmark for when ENV is set to 'prod'
 Deno.env.set("ENV", "prod");
