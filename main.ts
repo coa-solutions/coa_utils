@@ -16,9 +16,15 @@ const router = new Router();
 router.post(`/${URL_PATH_KEY}/slack/coa_utils`, async (context: Context) => {
   try {
     const req = context.request;
-    // const body = await req.body({ type: "json" }).value;
+    const body = await req.body({ type: "json" }).value; // Read JSON body
 
-    const baseBlocks: KnownBlock[] = [createHeaderBlock("COA Utils")];
+    // Create Slack message blocks based on received object
+    const baseBlocks: KnownBlock[] = [
+      createHeaderBlock("COA Utils"),
+      createMrkdwnSection(`*Tests:* ${body.tests}`),
+      createMrkdwnSection(`*Benchmarks:* ${body.benchmarks}`),
+      createMrkdwnSection(`*Latest:* ${body.latest}`),
+    ];
 
     await sendMessageToSlack({ blocks: baseBlocks });
 
