@@ -25,7 +25,6 @@ export async function validateAndGetEnvVars(
     finalEnv = await load({ envPath: "./.env" });
   }
 
-
   const envVars: Record<string, string> = {};
 
   for (const variable of variables) {
@@ -47,11 +46,9 @@ export async function validateAndGetEnvVars(
   return envVars;
 }
 
-
 /// This function knows to much, it should not need teh request object
-
 import { Status } from "https://deno.land/std@0.182.0/http/http_status.ts";
-
+//
 export async function verifyWebhookPayload(
   req: Request,
   body: string,
