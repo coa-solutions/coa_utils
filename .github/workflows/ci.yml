@@ -27,6 +27,9 @@ jobs:
           path: ${{ env.DENO_DIR }}
           key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
 
+      - name: Check env vars
+        run: |
+          env
       - name: Run tests
         id: run_tests
         run: |
