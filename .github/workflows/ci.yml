@@ -26,15 +26,15 @@ jobs:
       #     path: ${{ env.DENO_DIR }}
       #     key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
 
-      # - name: Run tests
-      #   id: run_tests
-      #   run: |
-      #     deno task test > test_output.txt
+      - name: Run tests
+        id: run_tests
+        run: |
+          deno task test
 
       - name: Run benchmarks
         id: run_benchmarks
         run: |
-          deno task bench > benchmark_output.txt
+          deno task bench
 
       - name: Tag as 'latest' and push tag
         run: |
