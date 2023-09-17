@@ -9,8 +9,8 @@ env:
   SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
   SLACK_DEFAULT_CHANNEL_ID: ${{ secrets.SLACK_DEFAULT_CHANNEL_ID }}
   DENO_DIR: .deno_cache
-  tests: "passed"
-  benchmarks: "passed"
+  tests: passed
+  benchmarks: passed
 
 jobs:
   build:
@@ -42,12 +42,16 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git fetch --tags
-          latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-          IFS='.' read -r -a version_parts <<< "$latest_tag"
-          major="${version_parts[0]}"
-          minor="${version_parts[1]}"
-          new_minor=$((minor + 1))
-          new_version="$major.$new_minor"
+          latest_tag=$(git tag --sort=committerdate | grep -E '^0\.[0-9]+$' | tail -1)
+          if [ -z "$latest_tag" ]; then
+            new_version="0.1"
+          else
+            IFS='.' read -r -a version_parts <<< "$latest_tag"
+            major="${version_parts[0]}"
+            minor="${version_parts[1]}"
+            new_minor=$((minor + 1))
+            new_version="$major.$new_minor"
+          fi
           echo "new_version=$new_version" >> $GITHUB_ENV
           git tag "$new_version"
           git push origin "$new_version"
