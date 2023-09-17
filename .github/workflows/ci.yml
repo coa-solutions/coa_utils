@@ -5,8 +5,8 @@ on:
     branches:
       - main
 
-env:
-  DENO_DIR: .deno_cache
+# env:
+#   DENO_DIR: .deno_cache
 
 jobs:
   build:
@@ -21,15 +21,16 @@ jobs:
         with:
           deno-version: v1.x
 
-      - name: Cache Deno dependencies
-        uses: actions/cache@v3
-        with:
-          path: ${{ env.DENO_DIR }}
-          key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
+      # - name: Cache Deno dependencies
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: ${{ env.DENO_DIR }}
+      #     key: ${{ secrets.CACHE_VERSION }}-${{ hashFiles('deno.lock') }}
 
       - name: Check env vars
         run: |
           env
+
       - name: Run tests
         id: run_tests
         run: |
