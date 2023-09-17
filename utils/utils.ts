@@ -18,7 +18,7 @@ export async function validateAndGetEnvVars(
   const ENV = Deno.env.get("ENV") || "dev";
   let finalEnv: Record<string, string | undefined>;
 
-  if (ENV === "prod") {
+  if (ENV === "prod" || ENV === "ci") {
     finalEnv = Deno.env.toObject();
   } else {
     // Load .env file from root directory
