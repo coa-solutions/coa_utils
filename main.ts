@@ -23,7 +23,9 @@ router.post(`/${URL_PATH_KEY}/slack/coa_utils`, async (context: Context) => {
       createHeaderBlock("COA Utils"),
       createMrkdwnSection(`*Tests:* ${body.tests}`),
       createMrkdwnSection(`*Benchmarks:* ${body.benchmarks}`),
-      createMrkdwnSection(`*Latest:* ${body.latest}`),
+      createMrkdwnSection(
+        `*Latest Tag:* <https://deno.land/x/coa_utils@${body.tag}|${body.tag}>`,
+      ),
     ];
 
     await sendMessageToSlack({ blocks: baseBlocks });
