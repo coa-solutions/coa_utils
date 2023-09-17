@@ -1,7 +1,4 @@
-import {
-  assertEquals,
-  assertRejects,
-} from "https://deno.land/std@0.201.0/assert/mod.ts";
+import { assertEquals } from "https://deno.land/std@0.201.0/assert/mod.ts";
 import { validateAndGetEnvVars } from "./utils.ts";
 
 // Function to append variables to .env
