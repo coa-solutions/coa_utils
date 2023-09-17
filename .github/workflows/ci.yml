@@ -58,6 +58,7 @@ jobs:
           echo "### Latest Version Tag" >> $GITHUB_STEP_SUMMARY
           echo "The latest version tag is: $new_version" >> $GITHUB_STEP_SUMMARY
           echo "Deno package URL: $deno_package_url" >> $GITHUB_STEP_SUMMARY
+          echo "NEW_VERSION=$new_version" >> $GITHUB_ENV
 
       - name: Send POST request to Slack
         env:
@@ -68,5 +69,5 @@ jobs:
           -d "{
               \"tests\": \"${{ env.tests }}\",
               \"benchmarks\": \"${{ env.benchmarks }}\",
-              \"tag\": \"$NEW_VERSION\"
+              \"tag\": \"${{ env.NEW_VERSION }}\"
           }"
