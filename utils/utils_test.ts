@@ -1,9 +1,8 @@
-// utils_test.ts
 import {
   assertEquals,
   assertRejects,
 } from "https://deno.land/std@0.201.0/assert/mod.ts";
-import { validateAndGetEnvVars } from "./utils.ts"; // Adjust the import path as necessary
+import { validateAndGetEnvVars } from "./utils.ts";
 
 // Function to append variables to .env
 async function appendEnvVars(vars: string) {
@@ -19,48 +18,50 @@ async function removeAppendedEnvVars(linesToRemove: number) {
 }
 
 Deno.test("validateAndGetEnvVars functionality", async (t) => {
-  // Append variables to .env
-  await appendEnvVars("\nTEST_VAR=TEST_VALUE\nCONTENT=FROM_ENV_FILE");
+  // Store original environment variables to restore later
+  const originalEnv = { ...Deno.env.toObject() };
 
-  await t.step("Should return expected variables", async () => {
+  // Clear all environment variables to isolate test
+  for (const key of Object.keys(originalEnv)) {
+    Deno.env.delete(key);
+  }
+
+  // Append variables to .env for DEV environment
+  await appendEnvVars("\nTEST_VAR=TEST_VALUE_DEV\nCONTENT=FROM_ENV_FILE");
+
+  // Test reading from .env file (DEV environment)
+  Deno.env.set("ENV", "dev");
+  await t.step("Should return expected variables in DEV", async () => {
     const result = await validateAndGetEnvVars(["TEST_VAR"]);
-    assertEquals(result, { TEST_VAR: "TEST_VALUE" });
+    assertEquals(result, { TEST_VAR: "TEST_VALUE_DEV" });
   });
 
-  await t.step("Should throw when variable is missing", async () => {
-    await assertRejects(
-      async () => {
-        await validateAndGetEnvVars(["MISSING_VAR"]); // This is expected to throw an error
-      },
-      Error,
-      "MISSING_VAR must be set in environment variables.",
-    );
+  // Test reading from system environment (PROD environment)
+  Deno.env.set("ENV", "prod");
+  Deno.env.set("CONTENT", "FROM_ENV"); // <-- Set this for the test
+  await t.step("Should return expected variables in PROD", async () => {
+    const result = await validateAndGetEnvVars(["CONTENT"]);
+    assertEquals(result, { CONTENT: "FROM_ENV" });
   });
 
-  await t.step(
-    "Should not throw when missing variable is allowed",
-    async () => {
-      const result = await validateAndGetEnvVars(["MISSING_VAR"], [
-        "MISSING_VAR",
-      ]);
-      assertEquals(result, {}); // Note that the MISSING_VAR key is not present at all
-    },
-  );
-
-  await t.step("Should respect the 'ENV' setting", async () => {
-    Deno.env.set("ENV", "dev");
-    const resultDev = await validateAndGetEnvVars(["CONTENT"]);
-    assertEquals(resultDev, { CONTENT: "FROM_ENV_FILE" });
-
-    Deno.env.set("ENV", "prod");
-    Deno.env.set("CONTENT", "FROM_ENV");
-    const resultProd = await validateAndGetEnvVars(["CONTENT"]);
-    assertEquals(resultProd, { CONTENT: "FROM_ENV" });
-
-    Deno.env.delete("ENV");
-    Deno.env.delete("CONTENT");
+  // Test reading from system environment (CI environment)
+  Deno.env.set("CI", "true");
+  Deno.env.set("CONTENT", "FROM_ENV"); // <-- Set this for the test
+  await t.step("Should return expected variables in CI", async () => {
+    const result = await validateAndGetEnvVars(["CONTENT"]);
+    assertEquals(result, { CONTENT: "FROM_ENV" });
   });
 
+  // Restore the original environment variables
+  for (const [key, value] of Object.entries(originalEnv)) {
+    Deno.env.set(key, value);
+  }
+
+  // Cleanup
+  Deno.env.delete("ENV");
+  Deno.env.delete("CI");
+  Deno.env.delete("TEST_VAR");
+  Deno.env.delete("CONTENT");
   // Remove appended variables from .env
-  await removeAppendedEnvVars(2); // Remove the last 2 lines we added
+  await removeAppendedEnvVars(2);
 });

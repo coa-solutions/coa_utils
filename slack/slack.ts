@@ -10,10 +10,11 @@ import {
 } from "./slack_deno.d.ts";
 import { KnownBlock, MessageAttachment } from "./slack.d.ts";
 
-const { SLACK_BOT_TOKEN, SLACK_CHANNEL_ID } = await validateAndGetEnvVars([
-  "SLACK_BOT_TOKEN",
-  "SLACK_CHANNEL_ID",
-]);
+const { SLACK_BOT_TOKEN, SLACK_DEFAULT_CHANNEL_ID } =
+  await validateAndGetEnvVars(
+    ["SLACK_BOT_TOKEN", "SLACK_DEFAULT_CHANNEL_ID"],
+    ["SLACK_DEFAULT_CHANNEL_ID"],
+  );
 
 const client = SlackAPI(SLACK_BOT_TOKEN);
 
@@ -48,7 +49,7 @@ export async function sendMessageToSlack(
     const { attachments, blocks, threadTs, text, channelId } = options;
 
     const ChatPostMessageArgs: Partial<ChatPostMessageArgs> = {
-      channel: channelId || SLACK_CHANNEL_ID,
+      channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
       unfurl_links: false,
     };
 
@@ -109,7 +110,7 @@ export async function updateMessageInSlack(
 ): Promise<BaseResponse> {
   const { channelId } = options;
   const updateOptions: UpdateMessageArgs = {
-    channel: channelId || SLACK_CHANNEL_ID,
+    channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
     unfurl_links: false,
     ts,
     blocks,
@@ -131,7 +132,7 @@ export async function uploadFileToSlack(
   const message = JSON.stringify(payload, null, 2);
 
   const result = await client.files.upload({
-    channels: SLACK_CHANNEL_ID,
+    channels: SLACK_DEFAULT_CHANNEL_ID,
     content: message,
     filetype: "json",
     filename: "payload.json",
@@ -145,7 +146,7 @@ export async function uploadFileToSlack(
 
 export async function deleteMessageInSlack(
   ts: string,
-  channel: string = SLACK_CHANNEL_ID,
+  channel: string = SLACK_DEFAULT_CHANNEL_ID,
 ): Promise<BaseResponse> {
   const deleteOptions = {
     channel,
