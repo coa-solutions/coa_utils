@@ -16,9 +16,10 @@ export async function validateAndGetEnvVars(
   allowMissing: string[] = [],
 ): Promise<Record<string, string>> {
   const ENV = Deno.env.get("ENV") || "dev";
+  const CI = Deno.env.get("CI");
   let finalEnv: Record<string, string | undefined>;
 
-  if (ENV === "prod" || ENV === "CI") {
+  if (ENV === "prod" || CI === "true") {
     finalEnv = Deno.env.toObject();
   } else {
     // Load .env file from root directory
