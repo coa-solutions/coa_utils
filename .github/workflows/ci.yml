@@ -31,12 +31,11 @@ jobs:
         id: run_tests
         run: |
           deno task test > test_output.txt
-    
+
       - name: Run benchmarks
         id: run_benchmarks
         run: |
           deno task bench > benchmark_output.txt
-
 
       - name: Tag as 'latest' and push tag
         run: |
@@ -47,18 +46,6 @@ jobs:
           echo "### Latest Tag" >> $GITHUB_STEP_SUMMARY
           echo "The tag has been updated to 'latest'." >> $GITHUB_STEP_SUMMARY
 
-      # - name: Increment version and push tag
-      #   run: |
-      #     git config user.name "GitHub Actions"
-      #     git config user.email "actions@github.com"
-      #     git fetch --tags
-      #     latest_tag=$(git describe --tags `git rev-list --tags --max-count=1`)
-      #     IFS='.' read -r -a version_parts <<< "$latest_tag"
-      #     major="${version_parts[0]}"
-      #     minor="${version_parts[1]}"
-      #     new_minor=$((minor + 1))
-      #     new_version="$major.$new_minor"
-      #     git tag "$new_version"
-      #     git push origin "$new_version"
-      #     echo "### Latest Version Tag" >> $GITHUB_STEP_SUMMARY
-      #     echo "The latest version tag is: $new_version" >> $GITHUB_STEP_SUMMARY
+      - name: Send POST request
+        run: |
+          curl -X POST "https://coa-utils.deno.dev/${{ secrets.URL_PATH_KEY }}/slack/coa_utils" -d '{}'
