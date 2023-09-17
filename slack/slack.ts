@@ -1,7 +1,14 @@
+// TODO: Add documentation
+
 import { SlackAPI } from "https://deno.land/x/deno_slack_api@2.1.1/mod.ts";
 import { validateAndGetEnvVars } from "../utils/utils.ts";
 import type * as SlackTypes from "./slack.d.ts";
-import { ChatPostMessageArgs } from "./slack.d.ts";
+import {
+  BaseResponse,
+  ChatPostMessageArgs,
+  ChatPostMessageResponse,
+} from "./slack_deno.d.ts";
+import { KnownBlock, MessageAttachment } from "./slack.d.ts";
 
 const { SLACK_BOT_TOKEN, SLACK_CHANNEL_ID } = await validateAndGetEnvVars([
   "SLACK_BOT_TOKEN",
@@ -10,11 +17,6 @@ const { SLACK_BOT_TOKEN, SLACK_CHANNEL_ID } = await validateAndGetEnvVars([
 
 const client = SlackAPI(SLACK_BOT_TOKEN);
 
-const DEFAULT_OPTIONS = {
-  channel: SLACK_CHANNEL_ID,
-  unfurl_links: false,
-};
-
 type SlackAPIResponse = {
   ok: boolean;
   error?: string;
@@ -22,10 +24,7 @@ type SlackAPIResponse = {
   ts?: string;
 };
 
-type MessageOptions = ChatPostMessageArgs;
-
 function handleError(result: SlackAPIResponse) {
-  console.log("handleError received:", result);  // Debugging line
   if (!result.ok) {
     const errorMsg = result.errors ? result.errors.join(", ") : "";
     throw new Error(
@@ -34,49 +33,62 @@ function handleError(result: SlackAPIResponse) {
   }
 }
 
-async function postMessage(options: MessageOptions): Promise<SlackAPIResponse> {
+interface SendMessageOptions {
+  text?: string;
+  blocks?: KnownBlock[];
+  attachments?: MessageAttachment[];
+  threadTs?: string;
+  channelId?: string;
+}
+
+export async function sendMessageToSlack(
+  options: SendMessageOptions = {},
+): Promise<ChatPostMessageResponse> {
   try {
-    const result = await client.chat.postMessage(options);
+    const { attachments, blocks, threadTs, text, channelId } = options;
+
+    const ChatPostMessageArgs: Partial<ChatPostMessageArgs> = {
+      channel: channelId || SLACK_CHANNEL_ID,
+      unfurl_links: false,
+    };
+
+    if (text) {
+      ChatPostMessageArgs.text = text;
+    }
+
+    if (blocks && blocks.length > 0) {
+      ChatPostMessageArgs.blocks = blocks;
+    }
+
+    if (attachments && attachments.length > 0) {
+      ChatPostMessageArgs.attachments = attachments;
+    }
+
+    if (threadTs) {
+      ChatPostMessageArgs.thread_ts = threadTs;
+    }
+
+    // Validate that one of text, blocks, or attachments is present
+    if (
+      !(
+        ChatPostMessageArgs.text ||
+        ChatPostMessageArgs.blocks ||
+        ChatPostMessageArgs.attachments
+      )
+    ) {
+      throw new Error("One of text, blocks, or attachments must be provided");
+    }
+
+    const result = await client.chat.postMessage(
+      ChatPostMessageArgs as unknown as ChatPostMessageArgs,
+    );
+
+    handleError(result);
+
     return result;
   } catch (e) {
     throw new Error(`Failed to send message to Slack: ${e.message}`);
   }
-}
-
-export async function sendMessageToSlack(
-  blocks: SlackTypes.KnownBlock[],
-  attachments: SlackTypes.MessageAttachment[] = [],
-  text?: string,
-): Promise<string> {
-  const messageOptions: MessageOptions = {
-    ...DEFAULT_OPTIONS,
-    blocks,
-    attachments,
-    text,
-  };
-
-  const result = await postMessage(messageOptions);
-  handleError(result);
-
-  return result.ts!;
-}
-
-export async function sendThreadedMessageToSlack(
-  blocks: SlackTypes.KnownBlock[],
-  threadTs: string,
-  attachments: SlackTypes.MessageAttachment[] = [],
-  text?: string,
-): Promise<void> {
-  const messageOptions: MessageOptions = {
-    ...DEFAULT_OPTIONS,
-    blocks,
-    attachments,
-    text,
-    thread_ts: threadTs,
-  };
-
-  const result = await postMessage(messageOptions);
-  handleError(result);
 }
 
 type UpdateMessageArgs = {
@@ -92,10 +104,13 @@ export async function updateMessageInSlack(
   ts: string,
   blocks?: SlackTypes.KnownBlock[],
   attachments?: SlackTypes.MessageAttachment[],
-  text?: string
-): Promise<void> {
+  text?: string,
+  options: { channelId?: string } = {},
+): Promise<BaseResponse> {
+  const { channelId } = options;
   const updateOptions: UpdateMessageArgs = {
-    ...DEFAULT_OPTIONS,
+    channel: channelId || SLACK_CHANNEL_ID,
+    unfurl_links: false,
     ts,
     blocks,
     attachments,
@@ -103,13 +118,16 @@ export async function updateMessageInSlack(
   };
 
   const result = await client.chat.update(updateOptions);
+
   handleError(result);
+
+  return result;
 }
 
 export async function uploadFileToSlack(
   payload: object,
-  threadTs: string
-): Promise<void> {
+  threadTs: string,
+): Promise<BaseResponse> {
   const message = JSON.stringify(payload, null, 2);
 
   const result = await client.files.upload({
@@ -122,20 +140,21 @@ export async function uploadFileToSlack(
 
   handleError(result); // Add this line for error handling
 
-  console.log("Payload posted to Slack as a JSON file in a thread.");
+  return result;
 }
 
 export async function deleteMessageInSlack(
   ts: string,
-  channel: string = SLACK_CHANNEL_ID
-): Promise<void> {
+  channel: string = SLACK_CHANNEL_ID,
+): Promise<BaseResponse> {
   const deleteOptions = {
     channel,
     ts,
   };
 
   const result = await client.chat.delete(deleteOptions);
+
   handleError(result);
 
-  console.log(`Deleted message with timestamp ${ts} in channel ${channel}`);
+  return result;
 }

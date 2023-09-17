@@ -1,28 +1,32 @@
 export {
-  sendThreadedMessageToSlack,
+  deleteMessageInSlack,
   sendMessageToSlack,
-  uploadFileToSlack,
   updateMessageInSlack,
-  deleteMessageInSlack
+  uploadFileToSlack,
 } from "./slack.ts";
 
 export {
-  createTextSection,
-  createButtonSection,
-  createMrkdwnSection,
-  createMrkdwnField,
-  createImageBlock,
-  createDividerBlock,
-  createContextBlock,
   createActionBlock,
-  createHeaderBlock
+  createButtonSection,
+  createContextBlock,
+  createDividerBlock,
+  createHeaderBlock,
+  createImageBlock,
+  createMrkdwnField,
+  createMrkdwnSection,
+  createTextSection,
 } from "./slack_block_builder.ts";
+
+export {
+  createAttachment,
+  createAttachmentField,
+} from "./slack_attachment_builder.ts";
 
 export type {
   Block,
   HeaderBlock,
   KnownBlock,
   MessageAttachment,
-  SectionBlock,
   MrkdwnElement,
+  SectionBlock,
 } from "./slack.d.ts";

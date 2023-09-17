@@ -1,21 +1,3 @@
-export type ChatPostMessageOptionalArgs = {
-  text?: string;
-  attachments?: any[];
-  blocks?: any[];
-  thread_ts?: string;
-  [otherOptions: string]: any;
-};
-
-export type ChatPostMessageOneOfRequired = ChatPostMessageOptionalArgs & Required<
-  | Pick<ChatPostMessageOptionalArgs, "text">
-  | Pick<ChatPostMessageOptionalArgs, "blocks">
-  | Pick<ChatPostMessageOptionalArgs, "attachments">
->;
-
-export type ChatPostMessageArgs = ChatPostMessageOneOfRequired & {
-  channel: string;
-};
-
 /*
  * Reusable shapes for argument values
  */
