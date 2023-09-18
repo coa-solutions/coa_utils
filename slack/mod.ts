@@ -18,11 +18,13 @@ export {
 } from "./slack_block_builder.ts";
 
 export {
+  createAdjudicateAttachment,
   createAttachment,
   createAttachmentField,
 } from "./slack_attachment_builder.ts";
 
 export type {
+  AttachmentAction,
   Block,
   HeaderBlock,
   KnownBlock,
