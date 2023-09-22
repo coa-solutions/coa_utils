@@ -253,7 +253,6 @@ async function sendExampleBlocksToSlack() {
             elapsedTimeStr: "5s",
             caseUrl: "http://example.com",
             color: "good",
-            
           }),
         ],
       },

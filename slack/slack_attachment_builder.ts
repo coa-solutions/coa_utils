@@ -29,7 +29,7 @@ export function createAttachmentField({
   };
 }
 
-interface AdjudicateAttachmentOptions {
+export interface AdjudicateAttachmentOptions {
   appealId?: string;
   formattedFileName?: string;
   fileSize?: string;
