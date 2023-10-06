@@ -101,6 +101,9 @@ type UpdateMessageOptions = {
   [otherOptions: string]: any;
 };
 
+
+// add docs
+// This updates a slack message that was previously sent, shows (edited) in the message
 export async function updateMessageInSlack(
   options: UpdateMessageOptions
 ): Promise<BaseResponse> {

@@ -30,6 +30,7 @@ export function createAttachmentField({
 }
 
 export interface AdjudicateAttachmentOptions {
+  text?: string;
   appealId?: string;
   formattedFileName?: string;
   fileSize?: string;
@@ -88,8 +89,8 @@ export function createAdjudicateAttachment(
 
   return createAttachment({
     ...(options.color && { color: options.color }),
+    ...(options.text && { text: options.text }),
     fields,
     actions,
-    ts: String(Math.floor(new Date().getTime() / 1000)),
   });
 }
