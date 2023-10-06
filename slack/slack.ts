@@ -92,9 +92,9 @@ export async function sendMessageToSlack(
   }
 }
 
-type UpdateMessageArgs = {
+type UpdateMessageOptions = {
   ts: string;
-  channel: string;
+  channelId?: string;
   text?: string;
   attachments?: SlackTypes.MessageAttachment[];
   blocks?: SlackTypes.KnownBlock[];
@@ -102,28 +102,45 @@ type UpdateMessageArgs = {
 };
 
 export async function updateMessageInSlack(
-  ts: string,
-  blocks?: SlackTypes.KnownBlock[],
-  attachments?: SlackTypes.MessageAttachment[],
-  text?: string,
-  options: { channelId?: string } = {},
+  options: UpdateMessageOptions
 ): Promise<BaseResponse> {
-  const { channelId } = options;
-  const updateOptions: UpdateMessageArgs = {
-    channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
-    unfurl_links: false,
-    ts,
-    blocks,
-    attachments,
-    text,
-  };
+  try {
+    const { ts, blocks, attachments, text, channelId } = options;
 
-  const result = await client.chat.update(updateOptions);
+    const updateOptions: UpdateMessageOptions = {
+      channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
+      ts,
+      unfurl_links: false,
+    };
 
-  handleError(result);
+    if (text) {
+      updateOptions.text = text;
+    }
 
-  return result;
+    if (blocks && blocks.length > 0) {
+      updateOptions.blocks = blocks;
+    }
+
+    if (attachments && attachments.length > 0) {
+      updateOptions.attachments = attachments;
+    }
+
+    // Validate that one of text, blocks, or attachments is present
+    if (!(updateOptions.text || updateOptions.blocks || updateOptions.attachments)) {
+      throw new Error("One of text, blocks, or attachments must be provided");
+    }
+
+    const result = await client.chat.update(updateOptions);
+
+    handleError(result);
+
+    return result;
+
+  } catch (e) {
+    throw new Error(`Failed to update message in Slack: ${e.message}`);
+  }
 }
+
 
 export async function uploadFileToSlack(
   payload: object,
