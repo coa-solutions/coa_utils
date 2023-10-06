@@ -38,7 +38,7 @@ interface SendMessageOptions {
   text?: string;
   blocks?: KnownBlock[];
   attachments?: MessageAttachment[];
-  threadTs?: string;
+  ts?: string;
   channelId?: string;
 }
 
@@ -46,7 +46,7 @@ export async function sendMessageToSlack(
   options: SendMessageOptions = {},
 ): Promise<ChatPostMessageResponse> {
   try {
-    const { attachments, blocks, threadTs, text, channelId } = options;
+    const { attachments, blocks, ts, text, channelId } = options;
 
     const ChatPostMessageArgs: Partial<ChatPostMessageArgs> = {
       channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
@@ -65,8 +65,8 @@ export async function sendMessageToSlack(
       ChatPostMessageArgs.attachments = attachments;
     }
 
-    if (threadTs) {
-      ChatPostMessageArgs.thread_ts = threadTs;
+    if (ts) {
+      ChatPostMessageArgs.thread_ts = ts;
     }
 
     // Validate that one of text, blocks, or attachments is present
@@ -144,7 +144,7 @@ export async function updateMessageInSlack(
 
 export async function uploadFileToSlack(
   payload: object,
-  threadTs: string,
+  ts: string,
 ): Promise<BaseResponse> {
   const message = JSON.stringify(payload, null, 2);
 
@@ -153,7 +153,7 @@ export async function uploadFileToSlack(
     content: message,
     filetype: "json",
     filename: "payload.json",
-    thread_ts: threadTs,
+    thread_ts: ts,
   });
 
   handleError(result); // Add this line for error handling
