@@ -20,9 +20,8 @@ router.post(
   async (context: Context) => {
     try {
       const req = context.request;
-      const body = await req.body({ type: "json" }).value; // Read JSON body
+      const body = await req.body({ type: "json" }).value;
 
-      // Create Slack message blocks based on received object
       const baseBlocks: KnownBlock[] = [
         createHeaderBlock("COA Utils"),
         createMrkdwnSection(`*Tests:* ${body.tests}`),
