@@ -1,9 +1,7 @@
 export {
-  deleteMessageInSlack,
-  // sendMessageToSlack,
-  // updateMessageInSlack,
+  // deleteMessageInSlack,
   sendSlackMessage,
-  uploadFileToSlack,
+  // uploadFileToSlack,
 } from "./slack.ts";
 
 export {

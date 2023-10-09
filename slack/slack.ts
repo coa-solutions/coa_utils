@@ -88,33 +88,33 @@ export async function sendSlackMessage(
   }
 }
 
-export async function uploadFileToSlack(
-  payload: object,
-  ts: string,
-): Promise<BaseResponse> {
-  const message = JSON.stringify(payload, null, 2);
+// export async function uploadFileToSlack(
+//   payload: object,
+//   ts: string,
+// ): Promise<BaseResponse> {
+//   const message = JSON.stringify(payload, null, 2);
 
-  const result = await client.files.upload({
-    channels: SLACK_DEFAULT_CHANNEL_ID,
-    content: message,
-    filetype: "json",
-    filename: "payload.json",
-    thread_ts: ts,
-  });
+//   const result = await client.files.upload({
+//     channels: SLACK_DEFAULT_CHANNEL_ID,
+//     content: message,
+//     filetype: "json",
+//     filename: "payload.json",
+//     thread_ts: ts,
+//   });
 
-  return result;
-}
+//   return result;
+// }
 
-export async function deleteMessageInSlack(
-  ts: string,
-  channel: string = SLACK_DEFAULT_CHANNEL_ID,
-): Promise<BaseResponse> {
-  const deleteOptions = {
-    channel,
-    ts,
-  };
+// export async function deleteMessageInSlack(
+//   ts: string,
+//   channel: string = SLACK_DEFAULT_CHANNEL_ID,
+// ): Promise<BaseResponse> {
+//   const deleteOptions = {
+//     channel,
+//     ts,
+//   };
 
-  const result = await client.chat.delete(deleteOptions);
+//   const result = await client.chat.delete(deleteOptions);
 
-  return result;
-}
+//   return result;
+// }
