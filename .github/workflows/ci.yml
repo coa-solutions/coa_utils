@@ -64,7 +64,7 @@ jobs:
         env:
           NEW_VERSION: ${{ env.NEW_VERSION }}
         run: |
-          curl -X POST "https://coa-utils.deno.dev/${{ secrets.URL_PATH_KEY }}/slack/coa_utils" \
+          curl -X POST "https://coa-utils.deno.dev/${{ secrets.URL_PATH_SECRET_KEY }}/slack/coa_utils" \
           -H "Content-Type: application/json" \
           -d "{
               \"tests\": \"${{ env.tests }}\",
