@@ -27,7 +27,7 @@ interface SendMessageOptions {
   attachments?: MessageAttachment[];
 }
 
-async function validateMessageArgs(args: ChatPostMessageArgs): Promise<void> {
+function validateMessageArgs(args: ChatPostMessageArgs): void {
   if (!(args.text || args.blocks || args.attachments)) {
     throw new Error("One of text, blocks, or attachments must be provided");
   }
