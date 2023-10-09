@@ -2,7 +2,6 @@
 
 import { SlackAPI } from "https://deno.land/x/deno_slack_api@2.1.1/mod.ts";
 import { validateAndGetEnvVars } from "../utils/utils.ts";
-import type * as SlackTypes from "./slack.d.ts";
 import {
   BaseResponse,
   ChatPostMessageArgs,
@@ -18,132 +17,76 @@ const { SLACK_BOT_TOKEN, SLACK_DEFAULT_CHANNEL_ID } =
 
 const client = SlackAPI(SLACK_BOT_TOKEN);
 
-type SlackAPIResponse = {
-  ok: boolean;
-  error?: string;
-  errors?: string[];
-  ts?: string;
-};
-
-function handleError(result: SlackAPIResponse) {
-  if (!result.ok) {
-    const errorMsg = result.errors ? result.errors.join(", ") : "";
-    throw new Error(
-      `Failed to send message to Slack: ${result.error}, Errors: ${errorMsg}`,
-    );
-  }
-}
-
 interface SendMessageOptions {
+  channelId?: string;
+  thread?: boolean;
+  parentTs?: string;
+  threadTs?: string;
   text?: string;
   blocks?: KnownBlock[];
   attachments?: MessageAttachment[];
-  ts?: string;
-  channelId?: string;
 }
 
-export async function sendMessageToSlack(
-  options: SendMessageOptions = {},
-): Promise<ChatPostMessageResponse> {
-  try {
-    const { attachments, blocks, ts, text, channelId } = options;
+async function validateMessageArgs(args: ChatPostMessageArgs): Promise<void> {
+  if (!(args.text || args.blocks || args.attachments)) {
+    throw new Error("One of text, blocks, or attachments must be provided");
+  }
+  if (!args.channel) {
+    throw new Error("Channel must be provided");
+  }
+}
 
-    const ChatPostMessageArgs: Partial<ChatPostMessageArgs> = {
-      channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
+export async function sendSlackMessage(
+  options: SendMessageOptions = {},
+): Promise<BaseResponse | ChatPostMessageResponse> {
+  try {
+    const {
+      attachments = [],
+      blocks = [],
+      thread = false,
+      parentTs,
+      threadTs,
+      text,
+      channelId = SLACK_DEFAULT_CHANNEL_ID,
+    } = options;
+
+    const ChatPostMessageArgs: ChatPostMessageArgs = {
+      channel: channelId,
+      text: text || "",
+      blocks,
+      attachments,
       unfurl_links: false,
     };
 
-    if (text) {
-      ChatPostMessageArgs.text = text;
+    await validateMessageArgs(ChatPostMessageArgs);
+
+    if (!parentTs && !threadTs) {
+      return await client.chat.postMessage(ChatPostMessageArgs);
     }
 
-    if (blocks && blocks.length > 0) {
-      ChatPostMessageArgs.blocks = blocks;
+    if (thread && parentTs) {
+      return await client.chat.postMessage({
+        ...ChatPostMessageArgs,
+        thread_ts: parentTs,
+      });
     }
 
-    if (attachments && attachments.length > 0) {
-      ChatPostMessageArgs.attachments = attachments;
+    if (thread && threadTs) {
+      return await client.chat.update({
+        ...ChatPostMessageArgs,
+        ts: threadTs,
+      });
     }
 
-    if (ts) {
-      ChatPostMessageArgs.thread_ts = ts;
-    }
-
-    // Validate that one of text, blocks, or attachments is present
-    if (
-      !(
-        ChatPostMessageArgs.text ||
-        ChatPostMessageArgs.blocks ||
-        ChatPostMessageArgs.attachments
-      )
-    ) {
-      throw new Error("One of text, blocks, or attachments must be provided");
-    }
-
-    const result = await client.chat.postMessage(
-      ChatPostMessageArgs as unknown as ChatPostMessageArgs,
-    );
-
-    handleError(result);
-
-    return result;
+    const tsToUpdate = parentTs ? parentTs : threadTs;
+    return await client.chat.update({
+      ...ChatPostMessageArgs,
+      ts: tsToUpdate,
+    });
   } catch (e) {
     throw new Error(`Failed to send message to Slack: ${e.message}`);
   }
 }
-
-type UpdateMessageOptions = {
-  ts: string;
-  channelId?: string;
-  text?: string;
-  attachments?: SlackTypes.MessageAttachment[];
-  blocks?: SlackTypes.KnownBlock[];
-  [otherOptions: string]: any;
-};
-
-
-// add docs
-// This updates a slack message that was previously sent, shows (edited) in the message
-export async function updateMessageInSlack(
-  options: UpdateMessageOptions
-): Promise<BaseResponse> {
-  try {
-    const { ts, blocks, attachments, text, channelId } = options;
-
-    const updateOptions: UpdateMessageOptions = {
-      channel: channelId || SLACK_DEFAULT_CHANNEL_ID,
-      ts,
-      unfurl_links: false,
-    };
-
-    if (text) {
-      updateOptions.text = text;
-    }
-
-    if (blocks && blocks.length > 0) {
-      updateOptions.blocks = blocks;
-    }
-
-    if (attachments && attachments.length > 0) {
-      updateOptions.attachments = attachments;
-    }
-
-    // Validate that one of text, blocks, or attachments is present
-    if (!(updateOptions.text || updateOptions.blocks || updateOptions.attachments)) {
-      throw new Error("One of text, blocks, or attachments must be provided");
-    }
-
-    const result = await client.chat.update(updateOptions);
-
-    handleError(result);
-
-    return result;
-
-  } catch (e) {
-    throw new Error(`Failed to update message in Slack: ${e.message}`);
-  }
-}
-
 
 export async function uploadFileToSlack(
   payload: object,
@@ -159,8 +102,6 @@ export async function uploadFileToSlack(
     thread_ts: ts,
   });
 
-  handleError(result); // Add this line for error handling
-
   return result;
 }
 
@@ -174,8 +115,6 @@ export async function deleteMessageInSlack(
   };
 
   const result = await client.chat.delete(deleteOptions);
-
-  handleError(result);
 
   return result;
 }

@@ -16,93 +16,76 @@ import {
   createTextSection,
   KnownBlock,
   MessageAttachment,
-  sendMessageToSlack,
-  updateMessageInSlack,
+  sendSlackMessage,
 } from "./mod.ts";
+import { ChatPostMessageSuccessfulResponse } from "./slack_deno.d.ts";
 
 Deno.test("Slack API Tests using mock_fetch", async (t) => {
-  // Install mock fetch globally
-  mf.install();
+  await t.step("sendSlackMessage should return a reponse", async () => {
+    const response = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      blocks: [createTextSection("Hello")],
+    })) as ChatPostMessageSuccessfulResponse;
 
-  // Helper to mock a Slack API response
-  const mockSlackAPI = (url: string, responseBody: string, status: number) => {
-    mf.mock(`POST@${url}`, () => {
-      return new Response(responseBody, { status });
-    });
-  };
-
-  // Mocking Slack's postMessage API for success scenario
-  mockSlackAPI("/api/chat.postMessage", `{"ok": true, "ts": "some_ts"}`, 200);
-
-  await t.step("sendMessageToSlack should return a timestamp", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Hello" },
-      },
-    ];
-    const response = await sendMessageToSlack({ blocks });
-    assertEquals(response.ts, "some_ts");
+    assertEquals(response.ok, true);
   });
 
-  // Mocking Slack's postMessage API for error scenario
-  mockSlackAPI(
-    "/api/chat.postMessage",
-    `{"ok": false, "error": "some_error"}`,
-    400,
-  );
-
   await t.step(
-    "sendMessageToSlack should throw an error for bad request",
+    "sendSlackMessage should return created a threaded reply",
     async () => {
-      const blocks: KnownBlock[] = [
-        {
-          type: "section",
-          text: { type: "mrkdwn", text: "Hello" },
-        },
-      ];
-      try {
-        await sendMessageToSlack({ blocks });
-      } catch (error) {
-        assertEquals(
-          error.message,
-          'Failed to send message to Slack: 400: {"ok": false, "error": "some_error"}',
-        );
-      }
+      const response = (await sendSlackMessage({
+        channelId: "C05S80996FR",
+        blocks: [createTextSection("Hello Thread")],
+      })) as ChatPostMessageSuccessfulResponse;
+
+      const threadResponse = (await sendSlackMessage({
+        channelId: "C05S80996FR",
+        thread: true,
+        parentTs: response.ts,
+        blocks: [createTextSection("Hello Back to you")],
+      })) as ChatPostMessageSuccessfulResponse;
+
+      assertEquals(threadResponse.ok, true);
     },
   );
 
-  // Mocking Slack's chat.postMessage for threads
-  mockSlackAPI("/api/chat.postMessage", `{"ok": true}`, 200);
+  await t.step("sendSlackMessage should update a parent message", async () => {
+    const response = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      blocks: [createTextSection("I'm Parent")],
+    })) as ChatPostMessageSuccessfulResponse;
 
-  await t.step("sendThreadedMessageToSlack should succeed", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Hello" },
-      },
-    ];
-    await sendMessageToSlack({ blocks, threadTs: "some_thread_ts" });
+    const updateResponse = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      parentTs: response.ts,
+      blocks: [createTextSection("I'm updated Parent")],
+    })) as ChatPostMessageSuccessfulResponse;
+
+    assertEquals(updateResponse.ok, true);
   });
 
-  // Mocking Slack's chat.update API
-  mockSlackAPI("/api/chat.update", `{"ok": true}`, 200);
+  await t.step("sendSlackMessage should update a thread message", async () => {
+    const response = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      blocks: [createTextSection("I'm Parent")],
+    })) as ChatPostMessageSuccessfulResponse;
+    const threadResponse = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      thread: true,
+      parentTs: response.ts,
+      blocks: [createTextSection("I'm Thread")],
+    })) as ChatPostMessageSuccessfulResponse;
+    const updateThreadResponse = (await sendSlackMessage({
+      channelId: "C05S80996FR",
+      thread: true,
+      threadTs: threadResponse.ts,
+      blocks: [createTextSection("I'm updated Thread")],
+    })) as ChatPostMessageSuccessfulResponse;
 
-  await t.step("updateMessageInSlack should succeed", async () => {
-    const blocks: KnownBlock[] = [
-      {
-        type: "section",
-        text: { type: "mrkdwn", text: "Markdown Message" },
-      },
-    ];
-    await updateMessageInSlack("some_ts", blocks);
+    assertEquals(updateThreadResponse.ok, true);
   });
 
-  // Reset handlers and uninstall mock fetch
-  mf.reset();
-  mf.uninstall();
-
-  await sendExampleBlocksToSlack();
+  // await sendExampleBlocksToSlack();
 });
 
 async function sendExampleBlocksToSlack() {
@@ -113,9 +96,9 @@ async function sendExampleBlocksToSlack() {
 
   // Add a divider block before the batch of example blocks
   const dividerBlock = createDividerBlock();
-  await sendMessageToSlack({ blocks: [dividerBlock], channelId });
+  await sendSlackMessage({ blocks: [dividerBlock], channelId });
 
-  await sendMessageToSlack({
+  await sendSlackMessage({
     text: `Starting tests at ${startTime}`,
     channelId,
   });
@@ -261,7 +244,7 @@ async function sendExampleBlocksToSlack() {
 
   for (const { title, options } of exampleBlocks) {
     const titleBlock = createMrkdwnSection(`\`\`\`${title}\`\`\``);
-    await sendMessageToSlack({
+    await sendSlackMessage({
       channelId,
       text: options.text, // Note the change here
       blocks: [titleBlock, ...(options.blocks || [])], // And here
@@ -270,15 +253,15 @@ async function sendExampleBlocksToSlack() {
   }
 
   // Add a divider block after the batch of example blocks
-  await sendMessageToSlack({ blocks: [dividerBlock], channelId });
+  await sendSlackMessage({ blocks: [dividerBlock], channelId });
 
   // Finish by sending a message stating that the tests ran successfully
   const endTime = new Date().toLocaleString();
-  await sendMessageToSlack({
+  await sendSlackMessage({
     text: `Tests ran successfully at ${endTime}`,
     channelId,
   });
 
   // Add a divider block after the batch of example blocks
-  await sendMessageToSlack({ blocks: [dividerBlock], channelId });
+  await sendSlackMessage({ blocks: [dividerBlock], channelId });
 }

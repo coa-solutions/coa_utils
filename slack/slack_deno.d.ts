@@ -1,5 +1,3 @@
-
-
 export type BaseResponse = {
   /**
    * @description `true` if the response from the server was successful, `false` otherwise.
@@ -16,7 +14,7 @@ export type BaseResponse = {
   /**
    * @description Optional metadata about the response returned by the server.
    */
-  "response_metadata"?: {
+  response_metadata?: {
     warnings?: string[];
     messages?: string[];
   };
@@ -35,8 +33,6 @@ export type BaseResponse = {
   [otherOptions: string]: any;
 };
 
-
-
 export type ChatPostMessageOptionalArgs = {
   /** @description The formatted text of the message to be published. If blocks are included, this will become the fallback text used in notifications. */
   text?: string;
@@ -52,9 +48,8 @@ export type ChatPostMessageOptionalArgs = {
   [otherOptions: string]: any;
 };
 
-type ChatPostMessageOneOfRequired =
-  & ChatPostMessageOptionalArgs
-  & Required<
+type ChatPostMessageOneOfRequired = ChatPostMessageOptionalArgs &
+  Required<
     | Pick<ChatPostMessageOptionalArgs, "text">
     | Pick<ChatPostMessageOptionalArgs, "blocks">
     | Pick<ChatPostMessageOptionalArgs, "attachments">
@@ -65,7 +60,7 @@ type ChatPostMessageArgs = ChatPostMessageOneOfRequired & {
   channel: string;
 };
 
-type ChatPostMessageSuccessfulResponse = BaseResponse & {
+export type ChatPostMessageSuccessfulResponse = BaseResponse & {
   ok: true;
   /** @description The channel the message was posted to */
   channel: string;
